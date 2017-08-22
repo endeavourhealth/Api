@@ -29,7 +29,8 @@ public class ConfigService {
         if(appConfig == null) {
             try {
                 String appConfigJson = ConfigManager.getConfiguration("application");
-                appConfig = ObjectMapperPool.getInstance().readValue(appConfigJson, AppConfig.class);
+                if (appConfigJson != null)
+                    appConfig = ObjectMapperPool.getInstance().readValue(appConfigJson, AppConfig.class);
 
             } catch (Exception e) {
                 LOG.error("Configuration Repository error", e);
