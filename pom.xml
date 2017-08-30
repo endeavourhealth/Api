@@ -4,7 +4,7 @@
 
     <groupId>org.endeavourhealth.common</groupId>
     <artifactId>api</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -15,7 +15,7 @@
 
         <endeavour-security.version>1.0-SNAPSHOT</endeavour-security.version>
         <endeavour-cache.version>1.0-SNAPSHOT</endeavour-cache.version>
-        <endeavour-config.version>1.08-SNAPSHOT</endeavour-config.version>
+        <endeavour-config.version>1.09-SNAPSHOT</endeavour-config.version>
 
         <jackson.version>2.5.4</jackson.version>
         <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
