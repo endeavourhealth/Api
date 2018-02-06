@@ -51,6 +51,7 @@ public final class StartupConfig implements ServletContextListener {
         LOG.trace("Shutting down...");
 
         cleanupJDBCDrivers();
+        cleanupConfigManagerLogback();
 
         for (Map.Entry<String, ContextShutdownHook> entry : shutdownHooks.entrySet()) {
             LOG.trace("\tShutting down hook [" + entry.getKey() + "]");
@@ -89,6 +90,12 @@ public final class StartupConfig implements ServletContextListener {
                 LOG.trace("Not deregistering JDBC driver {} as it does not belong to this webapp's ClassLoader", driver);
             }
         }
+    }
+
+    private void cleanupConfigManagerLogback() {
+        LOG.trace("Cleaning up ConfigManager/Logback...");
+        ConfigManager.shutdownLogback();
+        LOG.trace("ConfigManager/Logback cleanup done.");
     }
 
 }
