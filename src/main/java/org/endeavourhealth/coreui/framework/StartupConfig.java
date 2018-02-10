@@ -51,13 +51,17 @@ public final class StartupConfig implements ServletContextListener {
         LOG.trace("Shutting down...");
 
         cleanupJDBCDrivers();
-        cleanupConfigManagerLogback();
 
         for (Map.Entry<String, ContextShutdownHook> entry : shutdownHooks.entrySet()) {
             LOG.trace("\tShutting down hook [" + entry.getKey() + "]");
             entry.getValue().contextShutdown();
         }
-        LOG.trace("...Shutdown done.");
+
+        // Cleanup logback last
+        cleanupConfigManagerLogback();
+
+        // Only use console from this point
+        System.out.println("...Shutdown done.");
     }
 
     private void cleanupJDBCDrivers() {
