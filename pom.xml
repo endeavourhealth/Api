@@ -4,7 +4,7 @@
 
     <groupId>org.endeavourhealth.common</groupId>
     <artifactId>api</artifactId>
-    <version>1.10-SNAPSHOT</version>
+    <version>1.12-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -13,7 +13,8 @@
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
-        <endeavour-security.version>1.6-SNAPSHOT</endeavour-security.version>
+        <endeavour-security.version>1.7-SNAPSHOT</endeavour-security.version>
+        <endeavour-core.version>1.117-SNAPSHOT</endeavour-core.version>
 
         <jackson.version>2.5.4</jackson.version>
         <keycloak.version>3.0.0.Final</keycloak.version>
@@ -28,6 +29,12 @@
             <groupId>org.endeavourhealth.common</groupId>
             <artifactId>security</artifactId>
             <version>${endeavour-security.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.endeavourhealth.common</groupId>
+            <artifactId>core</artifactId>
+            <version>${endeavour-core.version}</version>
         </dependency>
 
         <dependency>

@@ -3,6 +3,7 @@ package org.endeavourhealth.coreui.framework;
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.common.config.ConfigManagerException;
+import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,18 +51,28 @@ public final class StartupConfig implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent contextEvent) {
         LOG.trace("Shutting down...");
 
+        cleanupConnectionManager();
         cleanupJDBCDrivers();
-
-        for (Map.Entry<String, ContextShutdownHook> entry : shutdownHooks.entrySet()) {
-            LOG.trace("\tShutting down hook [" + entry.getKey() + "]");
-            entry.getValue().contextShutdown();
-        }
+        cleanupShutdownHooks();
 
         // Cleanup logback last
         cleanupConfigManagerLogback();
 
         // Only use console from this point
         System.out.println("...Shutdown done.");
+    }
+
+    private void cleanupShutdownHooks() {
+        for (Map.Entry<String, ContextShutdownHook> entry : shutdownHooks.entrySet()) {
+            LOG.trace("\tShutting down hook [" + entry.getKey() + "]");
+            entry.getValue().contextShutdown();
+        }
+    }
+
+    private void cleanupConnectionManager() {
+        LOG.trace("Shutting down connection manager...");
+        ConnectionManager.shutdown();
+        LOG.trace("Connection manager shutdown done...");
     }
 
     private void cleanupJDBCDrivers() {
