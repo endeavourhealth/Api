@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,10 +28,24 @@ public class CORSFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
-        for(Map.Entry<String, String> header: getCorsConfig().entrySet())
+        for(Map.Entry<String, String> header: getCorsConfig().entrySet()) {
+            if ("access-control-allow-origin".equals(header.getKey().toLowerCase())) {
+                processAllowedOrigin(servletRequest, header.getValue(), httpResponse);
+            } else
             httpResponse.addHeader(header.getKey(), header.getValue());
+        }
 
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    private void processAllowedOrigin(ServletRequest servletRequest, String allowed, HttpServletResponse httpResponse) {
+        HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+        String origin = httpRequest.getHeader("origin");
+        if (origin == null || origin.isEmpty())
+            return;
+
+        if (allowed.toLowerCase().contains(origin.toLowerCase()))
+            httpResponse.addHeader("Access-Control-Allow-Origin", origin);
     }
 
     @Override
