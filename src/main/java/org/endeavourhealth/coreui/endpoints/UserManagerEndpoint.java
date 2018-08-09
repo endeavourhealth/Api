@@ -63,8 +63,8 @@ public class UserManagerEndpoint extends AbstractEndpoint {
             userRole.setRoleTypeName(obj[3].toString());
             userRole.setOrganisationId(obj[4].toString());
             userRole.setUserAccessProfileId(obj[5].toString());
-            userRole.setDeleted(obj[6].toString() == "1");
-            userRole.setDefault(obj[7].toString() == "1");
+            userRole.setDeleted(obj[6].toString().equals("1"));
+            userRole.setDefault(obj[7].toString().equals("1"));
 
             jsonUserRoles.add(userRole);
 
