@@ -50,6 +50,26 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
     }
 
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/setDefaultRole")
+    @ApiOperation(value = "Returns a list of all roles for the user")
+    public Response setDefaultRole(@Context SecurityContext sc,
+                             @ApiParam(value = "User Id the role is being changed for") @QueryParam("userId") String userId,
+                             @ApiParam(value = "Id of the new default role") @QueryParam("defaultRoleId") String defaultRoleId,
+                             @ApiParam(value = "User role id of the user making the change") @QueryParam("userRoleId") String userRoleId) throws Exception {
+        super.setLogbackMarkers(sc);
+
+        userAudit.save(getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
+                "Roles", "userId", userId);
+
+        LOG.trace("getRole");
+
+        return changeDefaultRole(userId, defaultRoleId, userRoleId);
+
+    }
+
     private Response getRolesForUser(String userId) throws Exception {
         List<Object[]> roles = UserRoleEntity.getUserRoles(userId);
         List<JsonUserRole> jsonUserRoles = new ArrayList<>();
@@ -89,6 +109,15 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         return Response
                 .ok()
                 .entity(jsonUserRoles)
+                .build();
+    }
+
+    private Response changeDefaultRole(String userId, String defaultRoleId, String userRoleId) throws Exception {
+
+        UserRoleEntity.changeDefaultRole(userId, defaultRoleId, userRoleId);
+
+        return Response
+                .ok()
                 .build();
     }
 }
