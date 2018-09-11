@@ -8,8 +8,9 @@ import org.endeavourhealth.core.database.dal.audit.UserAuditDalI;
 import org.endeavourhealth.core.database.dal.audit.models.AuditAction;
 import org.endeavourhealth.core.database.dal.audit.models.AuditModule;
 import org.endeavourhealth.datasharingmanagermodel.models.database.OrganisationEntity;
-import org.endeavourhealth.usermanagermodel.models.database.UserRoleEntity;
-import org.endeavourhealth.usermanagermodel.models.json.JsonUserRole;
+import org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity;
+import org.endeavourhealth.usermanagermodel.models.database.UserProjectEntity;
+import org.endeavourhealth.usermanagermodel.models.json.JsonUserProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,9 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/getRoles")
+    @Path("/getProjects")
     @ApiOperation(value = "Returns a list of all roles for the user")
-    public Response getRoles(@Context SecurityContext sc,
+    public Response getProjects(@Context SecurityContext sc,
                              @ApiParam(value = "User Id") @QueryParam("userId") String userId) throws Exception {
         super.setLogbackMarkers(sc);
 
@@ -46,19 +47,19 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
         LOG.trace("getRole");
 
-        return getRolesForUser(userId);
+        return getProjectsForUser(userId);
 
     }
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/setDefaultRole")
+    @Path("/setDefaultProject")
     @ApiOperation(value = "Returns a list of all roles for the user")
-    public Response setDefaultRole(@Context SecurityContext sc,
+    public Response setDefaultProject(@Context SecurityContext sc,
                              @ApiParam(value = "User Id the role is being changed for") @QueryParam("userId") String userId,
-                             @ApiParam(value = "Id of the new default role") @QueryParam("defaultRoleId") String defaultRoleId,
-                             @ApiParam(value = "User role id of the user making the change") @QueryParam("userRoleId") String userRoleId) throws Exception {
+                             @ApiParam(value = "Id of the new default project") @QueryParam("defaultProjectId") String defaultProjectId,
+                             @ApiParam(value = "User project id of the user making the change") @QueryParam("userProjectId") String userProjectId) throws Exception {
         super.setLogbackMarkers(sc);
 
         userAudit.save(getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
@@ -66,55 +67,62 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
         LOG.trace("getRole");
 
-        return changeDefaultRole(userId, defaultRoleId, userRoleId);
+        return changeDefaultProject(userId, defaultProjectId, userProjectId);
 
     }
 
-    private Response getRolesForUser(String userId) throws Exception {
-        List<Object[]> roles = UserRoleEntity.getUserRoles(userId);
-        List<JsonUserRole> jsonUserRoles = new ArrayList<>();
+    private Response getProjectsForUser(String userId) throws Exception {
+        List<Object[]> roles = UserProjectEntity.getUserProjects(userId);
+        List<JsonUserProject> jsonUserProjects = new ArrayList<>();
         List<String> organisations = new ArrayList<>();
+        List<String> projects = new ArrayList<>();
 
         for (Object[] obj : roles){
-            JsonUserRole userRole = new JsonUserRole();
-            userRole.setId(obj[0].toString());
-            userRole.setUserId(obj[1].toString());
-            userRole.setRoleTypeId(obj[2].toString());
-            userRole.setRoleTypeName(obj[3].toString());
-            userRole.setOrganisationId(obj[4].toString());
-            userRole.setUserAccessProfileId(obj[5].toString());
-            userRole.setDeleted(obj[6].toString().equals("1"));
-            userRole.setDefault(obj[7].toString().equals("1"));
+            JsonUserProject userProject = new JsonUserProject();
+            userProject.setId(obj[0].toString());
+            userProject.setUserId(obj[1].toString());
+            userProject.setProjectId(obj[2].toString());
+            userProject.setOrganisationId(obj[3].toString());
+            userProject.setDeleted(obj[4].toString().equals("1"));
+            userProject.setDefault(obj[5].toString().equals("1"));
 
-            jsonUserRoles.add(userRole);
+            jsonUserProjects.add(userProject);
 
-            organisations.add(obj[4].toString());
+            organisations.add(obj[3].toString());
+            projects.add(obj[2].toString());
         }
 
         if (roles.size() > 0) {
 
             Map<String, String> orgNameMap = new HashMap<>();
+            Map<String, String> projectNameMap = new HashMap<>();
             List<OrganisationEntity> orgList = OrganisationEntity.getOrganisationsFromList(organisations);
             for (OrganisationEntity org : orgList) {
                 orgNameMap.put(org.getUuid(), org.getName());
             }
 
+            List<ProjectEntity> projectList = ProjectEntity.getProjectsFromList(projects);
+            for (ProjectEntity proj : projectList) {
+                projectNameMap.put(proj.getUuid(), proj.getName());
+            }
 
-            for (JsonUserRole re : jsonUserRoles) {
+
+            for (JsonUserProject re : jsonUserProjects) {
                 re.setOrganisationName(orgNameMap.get(re.getOrganisationId()));
+                re.setProjectName(projectNameMap.get(re.getProjectId()));
             }
         }
 
         clearLogbackMarkers();
         return Response
                 .ok()
-                .entity(jsonUserRoles)
+                .entity(jsonUserProjects)
                 .build();
     }
 
-    private Response changeDefaultRole(String userId, String defaultRoleId, String userRoleId) throws Exception {
+    private Response changeDefaultProject(String userId, String defaultRoleId, String userRoleId) throws Exception {
 
-        UserRoleEntity.changeDefaultRole(userId, defaultRoleId, userRoleId);
+        UserProjectEntity.changeDefaultProject(userId, defaultRoleId, userRoleId);
 
         return Response
                 .ok()
