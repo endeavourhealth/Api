@@ -11,10 +11,7 @@ import org.endeavourhealth.core.database.dal.audit.models.AuditModule;
 import org.endeavourhealth.datasharingmanagermodel.models.database.OrganisationEntity;
 import org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity;
 import org.endeavourhealth.datasharingmanagermodel.models.json.JsonProject;
-import org.endeavourhealth.usermanagermodel.models.caching.ApplicationPolicyCache;
-import org.endeavourhealth.usermanagermodel.models.caching.OrganisationCache;
-import org.endeavourhealth.usermanagermodel.models.caching.ProjectCache;
-import org.endeavourhealth.usermanagermodel.models.caching.UserCache;
+import org.endeavourhealth.usermanagermodel.models.caching.*;
 import org.endeavourhealth.usermanagermodel.models.database.ApplicationPolicyAttributeEntity;
 import org.endeavourhealth.usermanagermodel.models.database.ApplicationPolicyEntity;
 import org.endeavourhealth.usermanagermodel.models.database.UserApplicationPolicyEntity;
@@ -95,6 +92,38 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
         return getUserProfile(userId);
 
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/flushCache")
+    @ApiOperation(value = "Returns a list of applications")
+    public Response flushCache(@Context SecurityContext sc) throws Exception {
+
+        super.setLogbackMarkers(sc);
+        userAudit.save(SecurityUtils.getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
+                "application(s)");
+
+        return flushCache();
+
+    }
+
+    private Response flushCache() throws Exception {
+        ApplicationCache.flushCache();
+        ApplicationPolicyCache.flushCache();
+        ApplicationProfileCache.flushCache();
+        DelegationCache.flushCache();
+        OrganisationCache.flushCache();
+        ProjectCache.flushCache();
+        RegionCache.flushCache();
+        RoleTypeCache.flushCache();
+        UserCache.flushCache();
+
+        clearLogbackMarkers();
+        return Response
+                .ok()
+                .build();
     }
 
     private Response getProjectsForUser(String userId) throws Exception {
@@ -188,8 +217,9 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         List<JsonUserOrganisationProject> organisationProjects = new ArrayList<>();
 
         for (UserProjectEntity profile : projectEntities) {
-            JsonUserOrganisationProject orgProject = organisationProjects.stream().filter(app -> app.getOrganisation().equals(profile.getOrganisationId())).findFirst().orElse(new JsonUserOrganisationProject());
+            JsonUserOrganisationProject orgProject = organisationProjects.stream().filter(app -> app.getOrganisation().getUuid().equals(profile.getOrganisationId())).findFirst().orElse(new JsonUserOrganisationProject());
             if (orgProject.getOrganisation() == null) {
+
                 OrganisationEntity organisation = OrganisationCache.getOrganisationDetails(profile.getOrganisationId());
 
                 orgProject.setOrganisation(organisation);
@@ -227,7 +257,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         List<JsonApplicationPolicyAttribute> userPolicyAttributes = ApplicationPolicyAttributeEntity.getApplicationPolicyAttributes(userPolicyId);
 
         for (JsonApplicationPolicyAttribute attribute : projectPolicyAttributes) {
-            if (userPolicyAttributes.stream().filter(a -> a.getId().equals(attribute.getId())).findFirst().isPresent()) {
+            if (userPolicyAttributes.stream().filter(a -> a.getApplicationAccessProfileId().equals(attribute.getApplicationAccessProfileId())).findFirst().isPresent()) {
                 //user policy has the project attribute so add it to the list
                 mergedAttributes.add(attribute);
             }
