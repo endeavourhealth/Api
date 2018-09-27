@@ -10,12 +10,10 @@ import org.endeavourhealth.core.database.dal.audit.models.AuditAction;
 import org.endeavourhealth.core.database.dal.audit.models.AuditModule;
 import org.endeavourhealth.datasharingmanagermodel.models.database.OrganisationEntity;
 import org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity;
+import org.endeavourhealth.datasharingmanagermodel.models.database.RegionEntity;
 import org.endeavourhealth.datasharingmanagermodel.models.json.JsonProject;
 import org.endeavourhealth.usermanagermodel.models.caching.*;
-import org.endeavourhealth.usermanagermodel.models.database.ApplicationPolicyAttributeEntity;
-import org.endeavourhealth.usermanagermodel.models.database.ApplicationPolicyEntity;
-import org.endeavourhealth.usermanagermodel.models.database.UserApplicationPolicyEntity;
-import org.endeavourhealth.usermanagermodel.models.database.UserProjectEntity;
+import org.endeavourhealth.usermanagermodel.models.database.*;
 import org.endeavourhealth.usermanagermodel.models.json.JsonApplicationPolicyAttribute;
 import org.endeavourhealth.usermanagermodel.models.json.JsonUserOrganisationProject;
 import org.endeavourhealth.usermanagermodel.models.json.JsonUserProfile;
@@ -197,6 +195,15 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         userProfile.setForename(userDetails.getFirstName());
         userProfile.setSurname(userDetails.getLastName());
         userProfile.setEmail(userDetails.getEmail());
+
+        UserRegionEntity userRegion = UserRegionEntity.getUserRegion(userId);
+        if (userRegion != null) {
+            RegionEntity region = RegionCache.getRegionDetails(userRegion.getRegionId());
+            if (region != null) {
+                userProfile.setRegion(region);
+            }
+        }
+
         Map<String, List<String>> userAttributes = userDetails.getAttributes();
         if (userAttributes != null) {
             Iterator var3 = userAttributes.keySet().iterator();
