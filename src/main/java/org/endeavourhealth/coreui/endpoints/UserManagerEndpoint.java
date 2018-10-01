@@ -8,9 +8,11 @@ import org.endeavourhealth.core.database.dal.DalProvider;
 import org.endeavourhealth.core.database.dal.audit.UserAuditDalI;
 import org.endeavourhealth.core.database.dal.audit.models.AuditAction;
 import org.endeavourhealth.core.database.dal.audit.models.AuditModule;
+import org.endeavourhealth.datasharingmanagermodel.models.database.MasterMappingEntity;
 import org.endeavourhealth.datasharingmanagermodel.models.database.OrganisationEntity;
 import org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity;
 import org.endeavourhealth.datasharingmanagermodel.models.database.RegionEntity;
+import org.endeavourhealth.datasharingmanagermodel.models.enums.MapType;
 import org.endeavourhealth.datasharingmanagermodel.models.json.JsonProject;
 import org.endeavourhealth.usermanagermodel.models.caching.*;
 import org.endeavourhealth.usermanagermodel.models.database.*;
@@ -104,6 +106,27 @@ public class UserManagerEndpoint extends AbstractEndpoint {
                 "application(s)");
 
         return flushCache();
+
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/getPublishersForProject")
+    @ApiOperation(value = "Returns a list of publising organisations for a project")
+    public Response getPublishersForProject(@Context SecurityContext sc,
+                                     @ApiParam(value = "Project id") @QueryParam("projectId") String projectId) throws Exception {
+
+        super.setLogbackMarkers(sc);
+        userAudit.save(SecurityUtils.getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
+                "projects(s)");
+
+        List<String> orgUuids = getPublishersForProject(projectId);
+
+        return Response
+                .ok()
+                .entity(orgUuids)
+                .build();
 
     }
 
@@ -271,5 +294,11 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         }
 
         return mergedAttributes;
+    }
+
+    public List<String> getPublishersForProject(String projectId) throws Exception {
+        List<String> orgUUIDs = MasterMappingEntity.getChildMappings(projectId, MapType.PROJECT.getMapType(), MapType.PUBLISHER.getMapType());
+
+        return orgUUIDs;
     }
 }
