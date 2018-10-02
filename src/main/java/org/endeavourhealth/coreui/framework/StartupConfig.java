@@ -4,6 +4,7 @@ import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.common.config.ConfigManagerException;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
+import org.endeavourhealth.usermanagermodel.models.caching.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,7 @@ public final class StartupConfig implements ServletContextListener {
         cleanupConnectionManager();
         cleanupJDBCDrivers();
         cleanupShutdownHooks();
+        cleanupCacheService();
 
         // Cleanup logback last
         cleanupConfigManagerLogback();
@@ -73,6 +75,12 @@ public final class StartupConfig implements ServletContextListener {
         LOG.trace("Shutting down connection manager...");
         ConnectionManager.shutdown();
         LOG.trace("Connection manager shutdown done...");
+    }
+
+    private void cleanupCacheService() {
+        LOG.trace("Shutting down cache service...");
+        CacheManager.stopScheduler();
+        LOG.trace("cache service shutdown done...");
     }
 
     private void cleanupJDBCDrivers() {
