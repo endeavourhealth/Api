@@ -4,7 +4,7 @@
 
     <groupId>org.endeavourhealth.common</groupId>
     <artifactId>api</artifactId>
-    <version>1.25-SNAPSHOT</version>
+    <version>1.26-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -20,7 +20,7 @@
         <keycloak.version>3.0.0.Final</keycloak.version>
         <servlet.version>3.1.0</servlet.version>
         <swagger.version>1.5.10</swagger.version>
-        <user-manager.version>0.0.13-SNAPSHOT</user-manager.version>
+        <user-manager.version>0.0.14-SNAPSHOT</user-manager.version>
         <data-sharing-manager-models.version>0.0.9-SNAPSHOT</data-sharing-manager-models.version>
 
     </properties>
