@@ -51,7 +51,7 @@ public final class AuditEndpoint extends AbstractEndpoint {
 	private void initKeycloakAdminClient() {
 
 		// get the Endeavour realm name
-		KeycloakDeployment keycloakDeployment = KeycloakConfigUtils.getDeployment();
+		KeycloakDeployment keycloakDeployment = KeycloakConfigUtils.getDeployment("keycloak");
 		keycloakRealm = keycloakDeployment.getRealm();
 		authServerBaseUrl = KeycloakConfigUtils.initialize();
 

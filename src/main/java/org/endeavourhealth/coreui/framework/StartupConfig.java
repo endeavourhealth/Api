@@ -85,13 +85,9 @@ public final class StartupConfig implements ServletContextListener {
 
     private void cleanupJDBCDrivers() {
         LOG.trace("Cleaning up JDBC drivers...");
-        try {
-            LOG.info("Calling MySQL AbandonedConnectionCleanupThread shutdown");
-            AbandonedConnectionCleanupThread.shutdown();
 
-        } catch (InterruptedException e) {
-            LOG.error("Error calling MySQL AbandonedConnectionCleanupThread shutdown {}", e);
-        }
+        LOG.info("Calling MySQL AbandonedConnectionCleanupThread shutdown");
+        AbandonedConnectionCleanupThread.checkedShutdown();
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
