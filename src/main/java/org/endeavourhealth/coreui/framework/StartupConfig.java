@@ -116,9 +116,9 @@ public final class StartupConfig implements ServletContextListener {
     }
 
     private void cleanupConfigManagerLogback() {
-        LOG.trace("Cleaning up ConfigManager/Logback...");
+        System.out.println("Cleaning up ConfigManager/Logback...");
         ConfigManager.shutdownLogback();
-        LOG.trace("ConfigManager/Logback cleanup done.");
+        System.out.println("ConfigManager/Logback cleanup done.");
     }
 
 }
