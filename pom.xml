@@ -4,7 +4,7 @@
 
     <groupId>org.endeavourhealth.common</groupId>
     <artifactId>api</artifactId>
-    <version>1.29-SNAPSHOT</version>
+    <version>1.30-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -14,7 +14,7 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
         <endeavour-security.version>1.12-SNAPSHOT</endeavour-security.version>
-        <endeavour-core.version>1.336-SNAPSHOT</endeavour-core.version>
+        <endeavour-core.version>1.339-SNAPSHOT</endeavour-core.version>
 
         <jackson.version>2.8.11</jackson.version>
         <keycloak.version>3.0.0.Final</keycloak.version>
