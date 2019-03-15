@@ -4,7 +4,7 @@
 
   <groupId>org.endeavourhealth.common</groupId>
   <artifactId>api</artifactId>
-  <version>1.32-SNAPSHOT</version>
+  <version>1.33-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -18,14 +18,15 @@
     <endeavour-security.version>1.14-SNAPSHOT</endeavour-security.version>
     <endeavour-core.version>1.344-SNAPSHOT</endeavour-core.version>
     <endeavour-config.version>1.25-SNAPSHOT</endeavour-config.version>
-    <user-models.version>0.0.18-SNAPSHOT</user-models.version>
-    <data-sharing-models.version>0.0.11-SNAPSHOT</data-sharing-models.version>
+    <user-models.version>0.0.19-SNAPSHOT</user-models.version>
+    <data-sharing-models.version>0.0.12-SNAPSHOT</data-sharing-models.version>
 
     <annotations.version>1.2</annotations.version>
     <httpcore.version>4.4.4</httpcore.version>
     <httpclient.version>4.5.2</httpclient.version>
     <jackson.version>2.9.8</jackson.version>
     <javax-ws-rs.version>2.0.1</javax-ws-rs.version>
+    <jersey.version>2.25.1</jersey.version>
     <keycloak.version>4.8.3.Final</keycloak.version>
     <mysql.version>8.0.12</mysql.version>
     <servlet.version>2.3</servlet.version>
@@ -97,6 +98,22 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey.version}</version>
     </dependency>
 
     <!-- JAX-RS -->
