@@ -4,7 +4,7 @@
 
   <groupId>org.endeavourhealth.common</groupId>
   <artifactId>api</artifactId>
-  <version>1.31-SNAPSHOT</version>
+  <version>1.32-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -14,12 +14,12 @@
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
 
-    <endeavour-cache.version>LATEST</endeavour-cache.version>
-    <endeavour-security.version>LATEST</endeavour-security.version>
-    <endeavour-core.version>LATEST</endeavour-core.version>
-    <endeavour-config.version>LATEST</endeavour-config.version>
-    <user-manager.version>LATEST</user-manager.version>
-    <data-sharing-manager-models.version>LATEST</data-sharing-manager-models.version>
+    <endeavour-cache.version>1.4-SNAPSHOT</endeavour-cache.version>
+    <endeavour-security.version>1.14-SNAPSHOT</endeavour-security.version>
+    <endeavour-core.version>1.344-SNAPSHOT</endeavour-core.version>
+    <endeavour-config.version>1.25-SNAPSHOT</endeavour-config.version>
+    <user-models.version>0.0.18-SNAPSHOT</user-models.version>
+    <data-sharing-models.version>0.0.11-SNAPSHOT</data-sharing-models.version>
 
     <annotations.version>1.2</annotations.version>
     <httpcore.version>4.4.4</httpcore.version>
@@ -30,7 +30,7 @@
     <mysql.version>8.0.12</mysql.version>
     <servlet.version>2.3</servlet.version>
     <slf4j.version>1.7.7</slf4j.version>
-    <swagger.version>1.5.10</swagger.version>
+    <swagger.version>1.5.22</swagger.version>
 
   </properties>
 
@@ -83,14 +83,14 @@
     <dependency>
       <groupId>org.endeavourhealth.userManager</groupId>
       <artifactId>UserModels</artifactId>
-      <version>${user-manager.version}</version>
+      <version>${user-models.version}</version>
     </dependency>
 
 
     <dependency>
       <groupId>org.endeavourhealth.dataSharingManager</groupId>
       <artifactId>Models</artifactId>
-      <version>${data-sharing-manager-models.version}</version>
+      <version>${data-sharing-models.version}</version>
     </dependency>
 
     <dependency>
@@ -143,7 +143,6 @@
       <version>${keycloak.version}</version>
       <scope>provided</scope>
     </dependency>
-
   </dependencies>
 
 
