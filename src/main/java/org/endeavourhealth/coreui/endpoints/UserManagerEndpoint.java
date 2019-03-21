@@ -4,22 +4,24 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.endeavourhealth.common.security.SecurityUtils;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.DAL.SecurityMasterMappingDAL;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.OrganisationEntity;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.ProjectEntity;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.RegionEntity;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.enums.MapType;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.json.JsonProject;
+import org.endeavourhealth.common.security.usermanagermodel.models.DAL.SecurityUserProjectDAL;
+import org.endeavourhealth.common.security.usermanagermodel.models.DAL.SecurityUserRegionDAL;
+import org.endeavourhealth.common.security.usermanagermodel.models.caching.*;
+import org.endeavourhealth.common.security.usermanagermodel.models.database.*;
+import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonApplicationPolicyAttribute;
+import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonUserOrganisationProject;
+import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonUserProfile;
+import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonUserProject;
 import org.endeavourhealth.core.database.dal.DalProvider;
 import org.endeavourhealth.core.database.dal.audit.UserAuditDalI;
 import org.endeavourhealth.core.database.dal.audit.models.AuditAction;
 import org.endeavourhealth.core.database.dal.audit.models.AuditModule;
-import org.endeavourhealth.datasharingmanagermodel.models.database.MasterMappingEntity;
-import org.endeavourhealth.datasharingmanagermodel.models.database.OrganisationEntity;
-import org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity;
-import org.endeavourhealth.datasharingmanagermodel.models.database.RegionEntity;
-import org.endeavourhealth.datasharingmanagermodel.models.enums.MapType;
-import org.endeavourhealth.datasharingmanagermodel.models.json.JsonProject;
-import org.endeavourhealth.usermanagermodel.models.caching.*;
-import org.endeavourhealth.usermanagermodel.models.database.*;
-import org.endeavourhealth.usermanagermodel.models.json.JsonApplicationPolicyAttribute;
-import org.endeavourhealth.usermanagermodel.models.json.JsonUserOrganisationProject;
-import org.endeavourhealth.usermanagermodel.models.json.JsonUserProfile;
-import org.endeavourhealth.usermanagermodel.models.json.JsonUserProject;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,7 +140,6 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         OrganisationCache.flushCache();
         ProjectCache.flushCache();
         RegionCache.flushCache();
-        RoleTypeCache.flushCache();
         UserCache.flushCache();
 
         clearLogbackMarkers();
@@ -148,7 +149,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     }
 
     private Response getProjectsForUser(String userId) throws Exception {
-        List<Object[]> roles = UserProjectEntity.getUserProjects(userId);
+        List<Object[]> roles = new SecurityUserProjectDAL().getUserProjects(userId);
         List<JsonUserProject> jsonUserProjects = new ArrayList<>();
         List<String> organisations = new ArrayList<>();
         List<String> projects = new ArrayList<>();
@@ -172,12 +173,12 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
             Map<String, String> orgNameMap = new HashMap<>();
             Map<String, String> projectNameMap = new HashMap<>();
-            List<OrganisationEntity> orgList = OrganisationEntity.getOrganisationsFromList(organisations);
+            List<OrganisationEntity> orgList = OrganisationCache.getOrganisationDetails(organisations);
             for (OrganisationEntity org : orgList) {
                 orgNameMap.put(org.getUuid(), org.getName());
             }
 
-            List<ProjectEntity> projectList = ProjectEntity.getProjectsFromList(projects);
+            List<ProjectEntity> projectList = ProjectCache.getProjectDetails(projects);
             for (ProjectEntity proj : projectList) {
                 projectNameMap.put(proj.getUuid(), proj.getName());
             }
@@ -198,7 +199,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
     private Response changeDefaultProject(String userId, String defaultRoleId, String userRoleId) throws Exception {
 
-        UserProjectEntity.changeDefaultProject(userId, defaultRoleId, userRoleId);
+        new SecurityUserProjectDAL().changeDefaultProject(userId, defaultRoleId, userRoleId);
 
         return Response
                 .ok()
@@ -210,10 +211,11 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         if (userDetails == null) {
             System.out.println("user details could not be obtained");
         }
-        UserApplicationPolicyEntity userApplicationPolicyEntity = UserApplicationPolicyEntity.getUserApplicationPolicyId(userId);
+        UserApplicationPolicyEntity userApplicationPolicyEntity = UserCache.getUserApplicationPolicy(userId);
+
         ApplicationPolicyEntity userAppPolicyEntity = ApplicationPolicyCache.getApplicationPolicyDetails(userApplicationPolicyEntity.getApplicationPolicyId());
 
-        List<UserProjectEntity> projectEntities = UserProjectEntity.getUserProjectEntities(userId);
+        List<UserProjectEntity> projectEntities = new SecurityUserProjectDAL().getUserProjectEntities(userId);
 
         JsonUserProfile userProfile = new JsonUserProfile();
         userProfile.setUuid(userDetails.getId());
@@ -222,7 +224,8 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         userProfile.setSurname(userDetails.getLastName());
         userProfile.setEmail(userDetails.getEmail());
 
-        UserRegionEntity userRegion = UserRegionEntity.getUserRegion(userId);
+        UserRegionEntity userRegion = new SecurityUserRegionDAL().getUserRegion(userId);
+
         if (userRegion != null) {
             RegionEntity region = RegionCache.getRegionDetails(userRegion.getRegionId());
             if (region != null) {
@@ -280,14 +283,14 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     private List<JsonApplicationPolicyAttribute> processProjectPolicyAttributes(String userPolicyId, String projectPolicyId) throws Exception {
         List<JsonApplicationPolicyAttribute> mergedAttributes = new ArrayList<>();
 
-        List<JsonApplicationPolicyAttribute> projectPolicyAttributes = ApplicationPolicyAttributeEntity.getApplicationPolicyAttributes(projectPolicyId);
+        List<JsonApplicationPolicyAttribute> projectPolicyAttributes = ApplicationPolicyCache.getApplicationPolicyAttributes(projectPolicyId);
 
         if (userPolicyId.equals(projectPolicyId)) {
             // both user and project have the same policy so just return the project attributes
             return projectPolicyAttributes;
         }
 
-        List<JsonApplicationPolicyAttribute> userPolicyAttributes = ApplicationPolicyAttributeEntity.getApplicationPolicyAttributes(userPolicyId);
+        List<JsonApplicationPolicyAttribute> userPolicyAttributes = ApplicationPolicyCache.getApplicationPolicyAttributes(userPolicyId);
 
         for (JsonApplicationPolicyAttribute attribute : projectPolicyAttributes) {
             if (userPolicyAttributes.stream().filter(a -> a.getApplicationAccessProfileId().equals(attribute.getApplicationAccessProfileId())).findFirst().isPresent()) {
@@ -300,7 +303,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     }
 
     public List<String> getPublishersForProject(String projectId) throws Exception {
-        List<String> orgUUIDs = MasterMappingEntity.getChildMappings(projectId, MapType.PROJECT.getMapType(), MapType.PUBLISHER.getMapType());
+        List<String> orgUUIDs = new SecurityMasterMappingDAL().getChildMappings(projectId, MapType.PROJECT.getMapType(), MapType.PUBLISHER.getMapType());
 
         return orgUUIDs;
     }

@@ -3,8 +3,9 @@ package org.endeavourhealth.coreui.framework;
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.common.config.ConfigManagerException;
+import org.endeavourhealth.common.security.usermanagermodel.models.caching.CacheManager;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
-import org.endeavourhealth.usermanagermodel.models.caching.CacheManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
