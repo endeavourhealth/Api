@@ -224,7 +224,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         userProfile.setSurname(userDetails.getLastName());
         userProfile.setEmail(userDetails.getEmail());
 
-        UserRegionEntity userRegion = new SecurityUserRegionDAL().getUserRegion(userId);
+        UserRegionEntity userRegion = UserCache.getUserRegion(userId);
 
         if (userRegion != null) {
             RegionEntity region = RegionCache.getRegionDetails(userRegion.getRegionId());
