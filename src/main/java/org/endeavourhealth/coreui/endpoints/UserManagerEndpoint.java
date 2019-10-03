@@ -211,6 +211,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         if (userDetails == null) {
             System.out.println("user details could not be obtained");
         }
+
         UserApplicationPolicyEntity userApplicationPolicyEntity = UserCache.getUserApplicationPolicy(userId);
 
         ApplicationPolicyEntity userAppPolicyEntity = ApplicationPolicyCache.getApplicationPolicyDetails(userApplicationPolicyEntity.getApplicationPolicyId());
