@@ -1,7 +1,5 @@
 package org.endeavourhealth.coreui.endpoints;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.Authorization;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +10,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@Api(value = "Config", authorizations = {
-		@Authorization(value="oauth", scopes = {})
-})
 @Path("/config")
 public final class ConfigEndpoint extends AbstractEndpoint {
 	private static final Logger LOG = LoggerFactory.getLogger(ConfigEndpoint.class);

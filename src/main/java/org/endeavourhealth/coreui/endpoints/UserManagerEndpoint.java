@@ -1,8 +1,5 @@
 package org.endeavourhealth.coreui.endpoints;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.endeavourhealth.common.security.SecurityUtils;
 import org.endeavourhealth.common.security.datasharingmanagermodel.models.DAL.SecurityMasterMappingDAL;
 import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.OrganisationEntity;
@@ -11,7 +8,6 @@ import org.endeavourhealth.common.security.datasharingmanagermodel.models.databa
 import org.endeavourhealth.common.security.datasharingmanagermodel.models.enums.MapType;
 import org.endeavourhealth.common.security.datasharingmanagermodel.models.json.JsonProject;
 import org.endeavourhealth.common.security.usermanagermodel.models.DAL.SecurityUserProjectDAL;
-import org.endeavourhealth.common.security.usermanagermodel.models.DAL.SecurityUserRegionDAL;
 import org.endeavourhealth.common.security.usermanagermodel.models.caching.*;
 import org.endeavourhealth.common.security.usermanagermodel.models.database.*;
 import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonApplicationPolicyAttribute;
@@ -37,7 +33,6 @@ import java.util.*;
 import static org.endeavourhealth.common.security.SecurityUtils.getCurrentUserId;
 
 @Path("/userManager")
-@Api(value = "/userManager", description = "Get data related to the user manager")
 public class UserManagerEndpoint extends AbstractEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityEndpoint.class);
     private static final UserAuditDalI userAudit = DalProvider.factoryUserAuditDal(AuditModule.EdsUiModule.User);
@@ -46,9 +41,8 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/getProjects")
-    @ApiOperation(value = "Returns a list of all roles for the user")
     public Response getProjects(@Context SecurityContext sc,
-                             @ApiParam(value = "User Id") @QueryParam("userId") String userId) throws Exception {
+                             @QueryParam("userId") String userId) throws Exception {
         super.setLogbackMarkers(sc);
 
         userAudit.save(getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
@@ -64,11 +58,10 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/setDefaultProject")
-    @ApiOperation(value = "Returns a list of all roles for the user")
     public Response setDefaultProject(@Context SecurityContext sc,
-                             @ApiParam(value = "User Id the role is being changed for") @QueryParam("userId") String userId,
-                             @ApiParam(value = "Id of the new default project") @QueryParam("defaultProjectId") String defaultProjectId,
-                             @ApiParam(value = "User project id of the user making the change") @QueryParam("userProjectId") String userProjectId) throws Exception {
+                             @QueryParam("userId") String userId,
+                             @QueryParam("defaultProjectId") String defaultProjectId,
+                             @QueryParam("userProjectId") String userProjectId) throws Exception {
         super.setLogbackMarkers(sc);
 
         userAudit.save(getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
@@ -84,9 +77,8 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/getUserProfile")
-    @ApiOperation(value = "Returns a representation of the access rights for a user role")
     public Response getAccessProfile(@Context SecurityContext sc,
-                                     @ApiParam(value = "User id") @QueryParam("userId") String userId) throws Exception {
+                                     @QueryParam("userId") String userId) throws Exception {
 
         super.setLogbackMarkers(sc);
         userAudit.save(SecurityUtils.getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
@@ -100,7 +92,6 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/flushCache")
-    @ApiOperation(value = "Returns a list of applications")
     public Response flushCache(@Context SecurityContext sc) throws Exception {
 
         super.setLogbackMarkers(sc);
@@ -115,9 +106,8 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/getPublishersForProject")
-    @ApiOperation(value = "Returns a list of publising organisations for a project")
     public Response getPublishersForProject(@Context SecurityContext sc,
-                                     @ApiParam(value = "Project id") @QueryParam("projectId") String projectId) throws Exception {
+                                     @QueryParam("projectId") String projectId) throws Exception {
 
         super.setLogbackMarkers(sc);
         userAudit.save(SecurityUtils.getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,

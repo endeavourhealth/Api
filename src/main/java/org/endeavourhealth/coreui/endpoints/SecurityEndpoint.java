@@ -2,10 +2,6 @@ package org.endeavourhealth.coreui.endpoints;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
 import org.endeavourhealth.common.security.OrgRoles;
 import org.endeavourhealth.common.security.SecurityUtils;
 import org.endeavourhealth.coreui.framework.config.ConfigService;
@@ -25,9 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(value = "Security", authorizations = {
-        @Authorization(value="oauth", scopes = {})
-})
 @Path("/security")
 public final class SecurityEndpoint extends AbstractEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityEndpoint.class);
@@ -35,7 +28,6 @@ public final class SecurityEndpoint extends AbstractEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/info")
-    @ApiOperation(value = "Returns current user information")
     public Response userInfo(@Context SecurityContext sc) throws Exception {
 
         super.setLogbackMarkers(sc);
@@ -55,10 +47,9 @@ public final class SecurityEndpoint extends AbstractEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/info/organisationRoles")
-    @ApiOperation(value = "Returns current user's roles in the current organisation")
     public Response userInfoOrganisationRoles(@Context SecurityContext sc,
                                               @Context ContainerRequestContext containerRequestContext,
-                                              @ApiParam(defaultValue = OrgRoles.ROOT_ORGANISATION_ID, value="The currently selected organisation") @HeaderParam(value = OrgRoles.HEADER_ORGANISATION_ID) String headerOrgId) throws Exception {
+                                              @HeaderParam(value = OrgRoles.HEADER_ORGANISATION_ID) String headerOrgId) throws Exception {
 
         super.setLogbackMarkers(sc);
 
@@ -82,7 +73,6 @@ public final class SecurityEndpoint extends AbstractEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/info/organisations")
-    @ApiOperation(value = "Returns current user's available organisations")
     public Response userInfoOrganisations(@Context SecurityContext sc,
                                           @Context ContainerRequestContext containerRequestContext) throws Exception {
 
@@ -103,7 +93,6 @@ public final class SecurityEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/logoff")
-    @ApiOperation(value = "Redirects the current user to the single sign-off URL")
     public Response logoff(@Context SecurityContext sc) throws Exception {
         super.setLogbackMarkers(sc);
         LOG.trace("Logoff");
