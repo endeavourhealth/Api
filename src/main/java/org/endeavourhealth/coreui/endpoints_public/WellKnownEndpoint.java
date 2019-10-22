@@ -29,4 +29,20 @@ public final class WellKnownEndpoint {
                 .entity(ConfigService.instance().getAuthConfig())
                 .build();
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/authconfigraw")
+    public Response authconfigRaw() {
+
+        // IMPORTANT: Do NOT put anything sensitive in this config return,
+        //            it is intended to be used to configure the front-end
+        //            app by passing configuration stored on disk or in
+        //            a database
+
+        return Response
+            .ok()
+            .entity(ConfigService.instance().getAuthConfigRaw())
+            .build();
+    }
 }

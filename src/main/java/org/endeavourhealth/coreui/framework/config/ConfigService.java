@@ -5,6 +5,7 @@ import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.coreui.framework.config.models.AppConfig;
 import org.endeavourhealth.coreui.framework.config.models.AuthConfig;
+import org.endeavourhealth.coreui.framework.config.models.AuthConfigRaw;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ public class ConfigService {
 
     private AuthConfig authConfig;
     private AppConfig appConfig;
+    private AuthConfigRaw authConfigRaw;
 
     public AppConfig getAppConfig() {
 
@@ -85,4 +87,14 @@ public class ConfigService {
         return authConfig;
     }
 
+    public AuthConfigRaw getAuthConfigRaw() {
+        if (authConfigRaw == null) {
+            authConfig = getAuthConfig();
+            authConfigRaw = new AuthConfigRaw()
+                .setResource(authConfig.getAuthClientId())
+                .setRealm(authConfig.getRealm())
+                .setAuthServerUrl(authConfig.getAuthServerUrl());
+        }
+        return authConfigRaw;
+    }
 }
