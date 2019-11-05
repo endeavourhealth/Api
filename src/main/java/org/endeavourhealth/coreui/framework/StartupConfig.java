@@ -76,6 +76,10 @@ public final class StartupConfig implements ServletContextListener {
         LOG.trace("Shutting down connection manager...");
         ConnectionManager.shutdown();
         LOG.trace("Connection manager shutdown done...");
+
+        LOG.trace("Shutting down UM connection manager...");
+        org.endeavourhealth.common.security.usermanagermodel.models.ConnectionManager.shutdown();
+        LOG.trace("Connection manager shutdown done...");
     }
 
     private void cleanupCacheService() {
