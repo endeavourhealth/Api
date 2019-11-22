@@ -1,6 +1,7 @@
 package org.endeavourhealth.coreui.framework;
 
 import org.endeavourhealth.common.security.usermanagermodel.models.caching.UserCache;
+import org.endeavourhealth.common.security.usermanagermodel.models.database.UserProjectEntity;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +33,7 @@ public class AppAccessFilter implements Filter {
             //basic servlet request info
             String userId = httpServletRequest.getUserPrincipal().getName();
 
-            String projectId = httpServletRequest.getHeader("projectId");
+            String userProjectId = httpServletRequest.getHeader("userProjectId");
 
             String pathURI = httpServletRequest.getRequestURI();
 
@@ -41,11 +42,13 @@ public class AppAccessFilter implements Filter {
             // boolean isUserAllowedAccess = appId.equalsIgnoreCase("User Manager");
             Boolean isUserAllowedAccess = false;
 
-            if (projectId == null && (pathURI.contains("getUserProfile") || pathURI.contains("getProjects"))) {
+            if (userProjectId == null && (pathURI.contains("getUserProfile") || pathURI.contains("getProjects"))) {
                 isUserAllowedAccess = true;
             } else {
                 try {
-                    isUserAllowedAccess = UserCache.getUserProjectApplicationAccess(userId, projectId, appId);
+
+                    UserProjectEntity userProject = UserCache.getUserProject(userProjectId);
+                    isUserAllowedAccess = UserCache.getUserProjectApplicationAccess(userId, userProject.getProjectId(), appId);
 
                 } catch (Exception e) {
                     logger.log(Level.INFO, "Error: " + e.getMessage());
