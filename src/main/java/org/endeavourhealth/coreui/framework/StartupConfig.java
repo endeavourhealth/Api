@@ -52,7 +52,6 @@ public final class StartupConfig implements ServletContextListener {
         //now we've set our app name, we can start our heartbeat reporting to Graphite
         MetricsHelper.startHeartbeat();
         LOG.trace("Heartbeat metric started");
-
     }
 
     public void contextDestroyed(ServletContextEvent contextEvent) {
