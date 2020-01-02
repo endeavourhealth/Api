@@ -4,6 +4,7 @@ import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.common.config.ConfigManagerException;
 import org.endeavourhealth.common.security.usermanagermodel.models.caching.CacheManager;
+import org.endeavourhealth.common.utility.MetricsHelper;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 
 import org.slf4j.Logger;
@@ -39,15 +40,19 @@ public final class StartupConfig implements ServletContextListener {
             LOG.warn("Application id (app_id) not set in context file (web.xml), reverting to 'default'");
             configId = "default";
         }
-        LOG.trace("ConfigId : [" + configId + "]");
 
-        LOG.trace("Initializing configuration manager");
+        LOG.trace("Initializing configuration manager for app ID [" + configId + "]");
         try {
             ConfigManager.Initialize(configId);
         } catch (ConfigManagerException e) {
             LOG.error(e.getMessage());
         }
         LOG.trace("Configuration manager initialized");
+
+        //now we've set our app name, we can start our heartbeat reporting to Graphite
+        MetricsHelper.startHeartbeat();
+        LOG.trace("Heartbeat metric started");
+
     }
 
     public void contextDestroyed(ServletContextEvent contextEvent) {

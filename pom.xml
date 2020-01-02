@@ -4,7 +4,7 @@
 
   <groupId>org.endeavourhealth.common</groupId>
   <artifactId>api</artifactId>
-  <version>1.42-SNAPSHOT</version>
+  <version>1.43-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -85,6 +85,18 @@
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-json-jackson</artifactId>
+    </dependency>
+
+    <!-- needed for InstrumentedResourceMethodApplicationListener-->
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jersey2</artifactId>
+    </dependency>
+
+    <!-- needed for InstrumentedFilterContextListener -->
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-servlet</artifactId>
     </dependency>
 
     <!-- JAX-RS -->
