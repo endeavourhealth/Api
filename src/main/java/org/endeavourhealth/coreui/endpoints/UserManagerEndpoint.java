@@ -1,23 +1,26 @@
 package org.endeavourhealth.coreui.endpoints;
 
 import org.endeavourhealth.common.security.SecurityUtils;
-import org.endeavourhealth.common.security.datasharingmanagermodel.models.DAL.SecurityMasterMappingDAL;
-import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.OrganisationEntity;
-import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.ProjectEntity;
-import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.RegionEntity;
-import org.endeavourhealth.common.security.datasharingmanagermodel.models.enums.MapType;
-import org.endeavourhealth.common.security.datasharingmanagermodel.models.json.JsonProject;
-import org.endeavourhealth.common.security.usermanagermodel.models.DAL.SecurityUserProjectDAL;
-import org.endeavourhealth.common.security.usermanagermodel.models.caching.*;
-import org.endeavourhealth.common.security.usermanagermodel.models.database.*;
-import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonApplicationPolicyAttribute;
-import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonUserOrganisationProject;
-import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonUserProfile;
-import org.endeavourhealth.common.security.usermanagermodel.models.json.JsonUserProject;
 import org.endeavourhealth.core.database.dal.DalProvider;
 import org.endeavourhealth.core.database.dal.audit.UserAuditDalI;
 import org.endeavourhealth.core.database.dal.audit.models.AuditAction;
 import org.endeavourhealth.core.database.dal.audit.models.AuditModule;
+import org.endeavourhealth.core.database.dal.datasharingmanager.MasterMappingDalI;
+import org.endeavourhealth.core.database.dal.datasharingmanager.enums.MapType;
+import org.endeavourhealth.core.database.dal.datasharingmanager.models.JsonProject;
+import org.endeavourhealth.core.database.dal.usermanager.UserProjectDalI;
+import org.endeavourhealth.core.database.dal.usermanager.caching.*;
+import org.endeavourhealth.core.database.dal.usermanager.models.JsonApplicationPolicyAttribute;
+import org.endeavourhealth.core.database.dal.usermanager.models.JsonUserOrganisationProject;
+import org.endeavourhealth.core.database.dal.usermanager.models.JsonUserProfile;
+import org.endeavourhealth.core.database.dal.usermanager.models.JsonUserProject;
+import org.endeavourhealth.core.database.rdbms.datasharingmanager.models.OrganisationEntity;
+import org.endeavourhealth.core.database.rdbms.datasharingmanager.models.ProjectEntity;
+import org.endeavourhealth.core.database.rdbms.datasharingmanager.models.RegionEntity;
+import org.endeavourhealth.core.database.rdbms.usermanager.models.ApplicationPolicyEntity;
+import org.endeavourhealth.core.database.rdbms.usermanager.models.UserApplicationPolicyEntity;
+import org.endeavourhealth.core.database.rdbms.usermanager.models.UserProjectEntity;
+import org.endeavourhealth.core.database.rdbms.usermanager.models.UserRegionEntity;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,9 @@ import static org.endeavourhealth.common.security.SecurityUtils.getCurrentUserId
 public class UserManagerEndpoint extends AbstractEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityEndpoint.class);
     private static final UserAuditDalI userAudit = DalProvider.factoryUserAuditDal(AuditModule.EdsUiModule.User);
+
+    private static MasterMappingDalI masterMappingRepository = DalProvider.factoryDSMMasterMappingDal();
+    private static UserProjectDalI userProjectRepository = DalProvider.factoryUMUserProjectDal();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -91,20 +97,6 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/flushCache")
-    public Response flushCache(@Context SecurityContext sc) throws Exception {
-
-        super.setLogbackMarkers(sc);
-        userAudit.save(SecurityUtils.getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
-                "application(s)");
-
-        return flushCache();
-
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/getPublishersForProject")
     public Response getPublishersForProject(@Context SecurityContext sc,
                                      @QueryParam("projectId") String projectId) throws Exception {
@@ -122,24 +114,9 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
     }
 
-    private Response flushCache() throws Exception {
-        ApplicationCache.flushCache();
-        ApplicationPolicyCache.flushCache();
-        ApplicationProfileCache.flushCache();
-        DelegationCache.flushCache();
-        OrganisationCache.flushCache();
-        ProjectCache.flushCache();
-        RegionCache.flushCache();
-        UserCache.flushCache();
-
-        clearLogbackMarkers();
-        return Response
-                .ok()
-                .build();
-    }
-
     private Response getProjectsForUser(String userId) throws Exception {
-        List<Object[]> roles = new SecurityUserProjectDAL().getUserProjects(userId);
+
+        List<Object[]> roles = userProjectRepository.getUserProjects(userId);
         List<JsonUserProject> jsonUserProjects = new ArrayList<>();
         List<String> organisations = new ArrayList<>();
         List<String> projects = new ArrayList<>();
@@ -189,7 +166,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
     private Response changeDefaultProject(String userId, String defaultRoleId, String userRoleId) throws Exception {
 
-        new SecurityUserProjectDAL().changeDefaultProject(userId, defaultRoleId, userRoleId);
+        userProjectRepository.changeDefaultProject(userId, defaultRoleId, userRoleId);
 
         return Response
                 .ok()
@@ -201,12 +178,13 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         if (userDetails == null) {
             System.out.println("user details could not be obtained");
         }
+        List<String> results = ProjectCache.getAllPublishersForProjectWithSubscriberCheck("f0bc6f4a-8f18-11e8-839e-80fa5b320513", "VLD0P");
 
         UserApplicationPolicyEntity userApplicationPolicyEntity = UserCache.getUserApplicationPolicy(userId);
 
         ApplicationPolicyEntity userAppPolicyEntity = ApplicationPolicyCache.getApplicationPolicyDetails(userApplicationPolicyEntity.getApplicationPolicyId());
 
-        List<UserProjectEntity> projectEntities = new SecurityUserProjectDAL().getUserProjectEntities(userId);
+        List<UserProjectEntity> projectEntities = userProjectRepository.getUserProjectEntities(userId);
 
         JsonUserProfile userProfile = new JsonUserProfile();
         userProfile.setUuid(userDetails.getId());
@@ -294,8 +272,9 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     }
 
     public List<String> getPublishersForProject(String projectId) throws Exception {
-        List<String> orgUUIDs = new SecurityMasterMappingDAL().getChildMappings(projectId, MapType.PROJECT.getMapType(), MapType.PUBLISHER.getMapType());
+        List<String> orgUUIDs = masterMappingRepository.getChildMappings(projectId, MapType.PROJECT.getMapType(), MapType.PUBLISHER.getMapType());
 
         return orgUUIDs;
     }
+
 }

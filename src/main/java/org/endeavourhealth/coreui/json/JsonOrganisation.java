@@ -1,7 +1,7 @@
 package org.endeavourhealth.coreui.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.endeavourhealth.core.database.dal.admin.models.Organisation;
+import org.endeavourhealth.core.database.dal.admin.models.Service;
 
 import java.util.Map;
 import java.util.UUID;
@@ -19,10 +19,10 @@ public final class JsonOrganisation {
     public JsonOrganisation() {
     }
 
-    public JsonOrganisation(Organisation org, Boolean isAdmin) {
+    public JsonOrganisation(Service org, Boolean isAdmin) {
         this.uuid = org.getId();
         this.name = org.getName();
-        this.nationalId = org.getNationalId();
+        this.nationalId = org.getLocalId();
         this.isAdmin = isAdmin;
 
         if (isAdmin != null) {

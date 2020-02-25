@@ -1,7 +1,7 @@
 package org.endeavourhealth.coreui.framework;
 
-import org.endeavourhealth.common.security.usermanagermodel.models.caching.UserCache;
-import org.endeavourhealth.common.security.usermanagermodel.models.database.UserProjectEntity;
+import org.endeavourhealth.core.database.dal.usermanager.caching.UserCache;
+import org.endeavourhealth.core.database.rdbms.usermanager.models.UserProjectEntity;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

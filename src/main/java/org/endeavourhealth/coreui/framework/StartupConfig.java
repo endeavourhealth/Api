@@ -3,8 +3,8 @@ package org.endeavourhealth.coreui.framework;
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.common.config.ConfigManagerException;
-import org.endeavourhealth.common.security.usermanagermodel.models.caching.CacheManager;
 import org.endeavourhealth.common.utility.MetricsHelper;
+import org.endeavourhealth.core.database.dal.usermanager.caching.CacheManager;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 
 import org.slf4j.Logger;
@@ -82,7 +82,7 @@ public final class StartupConfig implements ServletContextListener {
         LOG.trace("Connection manager shutdown done...");
 
         LOG.trace("Shutting down UM connection manager...");
-        org.endeavourhealth.common.security.usermanagermodel.models.ConnectionManager.shutdown();
+        // org.endeavourhealth.core.um.models.ConnectionManager.shutdown();
         LOG.trace("Connection manager shutdown done...");
     }
 
