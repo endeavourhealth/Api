@@ -178,7 +178,6 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         if (userDetails == null) {
             System.out.println("user details could not be obtained");
         }
-        List<String> results = ProjectCache.getAllPublishersForProjectWithSubscriberCheck("f0bc6f4a-8f18-11e8-839e-80fa5b320513", "VLD0P");
 
         UserApplicationPolicyEntity userApplicationPolicyEntity = UserCache.getUserApplicationPolicy(userId);
 
