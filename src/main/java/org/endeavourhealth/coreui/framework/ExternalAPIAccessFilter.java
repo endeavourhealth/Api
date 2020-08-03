@@ -47,10 +47,13 @@ public class ExternalAPIAccessFilter implements Filter {
                     .request()
                     .header("Authorization", "Bearer "+headerAuthToken)
                     .get();
-            logger.info("Validation Test");
+            logger.info("Validation Testt");
+            logger.info("Status:"+String.valueOf(kcResponse.getStatus()));
             String entityResponse = kcResponse.readEntity(String.class);
+            logger.info("entityResponse:"+entityResponse);
             JSONParser parser = new JSONParser();
             JSONObject users = (JSONObject) parser.parse(entityResponse);
+            logger.info("users"+users);
             userID = users.get("sub").toString();
             logger.info("userId Check: "+userID);
 
