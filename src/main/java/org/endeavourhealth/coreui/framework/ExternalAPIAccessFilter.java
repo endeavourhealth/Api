@@ -53,7 +53,7 @@ public class ExternalAPIAccessFilter implements Filter {
                 JSONParser parser = new JSONParser();
                 JSONObject users = (JSONObject) parser.parse(entityResponse);
                 userID = users.get("sub").toString();
-                logger.info("userId: "+userID);
+                logger.info("userId Check: "+userID);
 
                 isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
 
