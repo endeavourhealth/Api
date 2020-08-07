@@ -47,26 +47,15 @@ public class ExternalAPIAccessFilter implements Filter {
                     .request()
                     .header("Authorization", "Bearer "+headerAuthToken)
                     .get();
-            logger.info("Validation Testtt");
-            logger.info("Status:"+String.valueOf(kcResponse.getStatus()));
-            String entityResponse = kcResponse.readEntity(String.class);
-            logger.info("entityResponse:"+entityResponse);
-            JSONParser parser = new JSONParser();
-            JSONObject users = (JSONObject) parser.parse(entityResponse);
-            logger.info("users"+users);
-            userID = users.get("sub").toString();
-            logger.info("userId Check: "+userID);
 
             if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
-                /*String entityResponse = kcResponse.readEntity(String.class);
+                String entityResponse = kcResponse.readEntity(String.class);
                 JSONParser parser = new JSONParser();
                 JSONObject users = (JSONObject) parser.parse(entityResponse);
                 userID = users.get("sub").toString();
-                logger.info("userId Check: "+userID);*/
-                logger.info("appName: "+appName);
-                logger.info("headerAuthToken: "+headerAuthToken);
+                logger.info("userId: "+userID);
+
                 isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
-                logger.info("isUserAllowedAccess: "+isUserAllowedAccess);
                 if (isUserAllowedAccess) {
                     chain.doFilter(request, response);
                 } else {
