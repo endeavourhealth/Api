@@ -35,8 +35,8 @@ public class ExternalAPIAccessFilter implements Filter {
 
         // validate the incoming authorization token by calling dev keycloak and produce the principal user identifier associated with the token
         Client client = ClientBuilder.newClient();
-        String url = "https://auth.discoverydataservice.net/";
-        String path = "auth/realms/endeavour/protocol/openid-connect/userinfo";
+         String url = "https://devauth.discoverydataservice.net/";
+        String path = "auth/realms/endeavour2/protocol/openid-connect/userinfo";
 
         WebTarget target = client.target(url).path(path);
 
