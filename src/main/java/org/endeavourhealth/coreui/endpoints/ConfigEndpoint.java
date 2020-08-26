@@ -18,7 +18,7 @@ public final class ConfigEndpoint extends AbstractEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Path("/api")
-	public Response getAudit(@Context SecurityContext sc, @QueryParam("api") String api) throws Exception {
+	public Response getApi(@Context SecurityContext sc, @QueryParam("api") String api) throws Exception {
 	    LOG.debug("Getting address for API [" + api + "]");
 
 	    String result = ConfigManager.getConfiguration("api", api);
@@ -28,4 +28,19 @@ public final class ConfigEndpoint extends AbstractEndpoint {
 				.entity(result)
 				.build();
 	}
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/appMenu")
+    public Response getAppMenu(@Context SecurityContext sc) throws Exception {
+        LOG.debug("Getting app menu config");
+
+        String result = ConfigManager.getConfiguration("appMenu");
+
+        return Response
+            .ok()
+            .entity(result)
+            .build();
+    }
 }
