@@ -1,7 +1,10 @@
 package org.endeavourhealth.coreui.framework;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.http.HttpStatus;
+import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.core.database.dal.usermanager.caching.UserCache;
+import org.endeavourhealth.coreui.framework.models.KeycloakConfig;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -30,13 +33,17 @@ public class ExternalAPIAccessFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest)request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
+
         String headerAuthToken = ((HttpServletRequest) request).getHeader("Authorization");
         String userID = "";
 
         // validate the incoming authorization token by calling dev keycloak and produce the principal user identifier associated with the token
         Client client = ClientBuilder.newClient();
-         String url = "https://devauth.discoverydataservice.net/";
-        String path = "auth/realms/endeavour2/protocol/openid-connect/userinfo";
+
+        KeycloakConfig kc= getConfig();
+
+        String url  = kc.getAuthServerUrl();
+        String path = kc.getPathPrefix()+"/"+kc.getRealm()+"/"+kc.getPathSuffix();
 
         WebTarget target = client.target(url).path(path);
 
@@ -77,5 +84,15 @@ public class ExternalAPIAccessFilter implements Filter {
     @Override
     public void destroy() {
 
+    }
+
+    private KeycloakConfig getConfig() throws IOException {
+        JsonNode jsonnode =  ConfigManager.getConfigurationAsJson("keycloak","ex_access_filter");
+        KeycloakConfig keycloakConfig = new KeycloakConfig();
+        keycloakConfig.setAuthServerUrl(jsonnode.get("auth-server-url").asText());
+        keycloakConfig.setRealm(jsonnode.get("realm").asText());
+        keycloakConfig.setPathPrefix(jsonnode.get("path_prefix").asText());
+        keycloakConfig.setPathSuffix(jsonnode.get("path_suffix").asText());
+        return keycloakConfig;
     }
 }
