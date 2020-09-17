@@ -54,13 +54,19 @@ public class ExternalAPIAccessFilter implements Filter {
                     .request()
                     .header("Authorization", "Bearer "+headerAuthToken)
                     .get();
-
-            if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
-                String entityResponse = kcResponse.readEntity(String.class);
+            
+             String entityResponse = kcResponse.readEntity(String.class);
                 JSONParser parser = new JSONParser();
                 JSONObject users = (JSONObject) parser.parse(entityResponse);
                 userID = users.get("sub").toString();
                 logger.info("userId: "+userID);
+
+            if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
+               /* String entityResponse = kcResponse.readEntity(String.class);
+                JSONParser parser = new JSONParser();
+                JSONObject users = (JSONObject) parser.parse(entityResponse);
+                userID = users.get("sub").toString();
+                logger.info("userId: "+userID);*/
 
                 isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
                 if (isUserAllowedAccess) {
