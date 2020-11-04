@@ -30,61 +30,67 @@ public class ExternalAPIAccessFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-        HttpServletRequest httpServletRequest = (HttpServletRequest)request;
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
+        String reg_url = httpServletRequest.getRequestURL().toString();
+        // no token validation  for healthCheck request
+        if (reg_url.contains("healthCheck")) {
+            chain.doFilter(request, response);
+        } else {
 
-        String headerAuthToken = ((HttpServletRequest) request).getHeader("Authorization");
-        String userID = "";
+            String headerAuthToken = ((HttpServletRequest) request).getHeader("Authorization");
+            String userID = "";
 
-        // validate the incoming authorization token by calling dev keycloak and produce the principal user identifier associated with the token
-        Client client = ClientBuilder.newClient();
+            // validate the incoming authorization token by calling dev keycloak and produce the principal user identifier associated with the token
+            Client client = ClientBuilder.newClient();
 
-        KeycloakConfig kc= getConfig();
+            KeycloakConfig kc = getConfig();
 
-        String url  = kc.getAuthServerUrl();
-        String path = kc.getPathPrefix()+"/"+kc.getRealm()+"/"+kc.getPathSuffix();
+            String url = kc.getAuthServerUrl();
+            String path = kc.getPathPrefix() + "/" + kc.getRealm() + "/" + kc.getPathSuffix();
 
-        WebTarget target = client.target(url).path(path);
+            WebTarget target = client.target(url).path(path);
 
-        Boolean isUserAllowedAccess = false;
+            Boolean isUserAllowedAccess = false;
 
-        try {
-            Response kcResponse = target
-                    .request()
-                    .header("Authorization", "Bearer "+headerAuthToken)
-                    .get();
-            
-             String entityResponse = kcResponse.readEntity(String.class);
+            try {
+                Response kcResponse = target
+                        .request()
+                        .header("Authorization", "Bearer " + headerAuthToken)
+                        .get();
+
+                String entityResponse = kcResponse.readEntity(String.class);
                 JSONParser parser = new JSONParser();
                 JSONObject users = (JSONObject) parser.parse(entityResponse);
                 userID = users.get("sub").toString();
-                logger.info("userId: "+userID);
+                logger.info("userId: " + userID);
 
-            if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
+                if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
                /* String entityResponse = kcResponse.readEntity(String.class);
                 JSONParser parser = new JSONParser();
                 JSONObject users = (JSONObject) parser.parse(entityResponse);
                 userID = users.get("sub").toString();
                 logger.info("userId: "+userID);*/
 
-                isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
-                if (isUserAllowedAccess) {
-                    chain.doFilter(request, response);
-                } else {
+                    isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
+                    if (isUserAllowedAccess) {
+                        chain.doFilter(request, response);
+                    } else {
+                        httpServletResponse.sendError(403, "Access is Forbidden");
+                    }
+
+                } else { // user is not authorized with this token
                     httpServletResponse.sendError(403, "Access is Forbidden");
+                    return;
                 }
 
-            } else { // user is not authorized with this token
+            } catch (Exception ex) {
                 httpServletResponse.sendError(403, "Access is Forbidden");
                 return;
             }
 
-        } catch (Exception ex) {
-            httpServletResponse.sendError(403, "Access is Forbidden");
-            return;
         }
-
     }
 
     @Override
