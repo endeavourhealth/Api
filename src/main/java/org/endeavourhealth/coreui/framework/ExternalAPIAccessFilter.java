@@ -99,7 +99,7 @@ public class ExternalAPIAccessFilter implements Filter {
     }
 
     private KeycloakConfig getConfig() throws IOException {
-        JsonNode jsonnode =  ConfigManager.getConfigurationAsJson("keycloak","ex_access_filter");
+        JsonNode jsonnode =  ConfigManager.getConfigurationAsJson("keycloak_filter","ex_access_filter");
         KeycloakConfig keycloakConfig = new KeycloakConfig();
         keycloakConfig.setAuthServerUrl(jsonnode.get("auth-server-url").asText());
         keycloakConfig.setRealm(jsonnode.get("realm").asText());
