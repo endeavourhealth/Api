@@ -45,6 +45,9 @@ public class ExternalAPIAccessFilter implements Filter {
             String headerAuthToken = ((HttpServletRequest) request).getHeader("Authorization");
             String userID = "";
 
+
+            logger.info("AuthToken=  " + headerAuthToken);
+
             // validate the incoming authorization token by calling dev keycloak and produce the principal user identifier associated with the token
             Client client = ClientBuilder.newClient();
 
@@ -53,6 +56,8 @@ public class ExternalAPIAccessFilter implements Filter {
             String url = kc.getAuthServerUrl();
             String path = kc.getPathPrefix() + "/" + kc.getRealm() + "/" + kc.getPathSuffix();
 
+
+            logger.info("keycloak url=  " + url + path);
             WebTarget target = client.target(url).path(path);
 
             Boolean isUserAllowedAccess = false;
@@ -64,6 +69,9 @@ public class ExternalAPIAccessFilter implements Filter {
                         .get();
 
                 String entityResponse = kcResponse.readEntity(String.class);
+
+                logger.info("response=  " + entityResponse);
+
                 JSONParser parser = new JSONParser();
                 JSONObject users = (JSONObject) parser.parse(entityResponse);
                 userID = users.get("sub").toString();
