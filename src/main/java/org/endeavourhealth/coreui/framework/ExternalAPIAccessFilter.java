@@ -86,17 +86,22 @@ public class ExternalAPIAccessFilter implements Filter {
 
                     isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
                     if (isUserAllowedAccess) {
+
+                        logger.info("User is allowed to access the API");
                         chain.doFilter(request, response);
                     } else {
+                        logger.info("User not allowed");
                         httpServletResponse.sendError(403, "Access is Forbidden");
                     }
 
                 } else { // user is not authorized with this token
+                    logger.info("keycloak response error");
                     httpServletResponse.sendError(403, "Access is Forbidden");
                     return;
                 }
 
             } catch (Exception ex) {
+                logger.info("Main error");
                 httpServletResponse.sendError(403, "Access is Forbidden");
                 return;
             }
