@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 public class ExternalAPIAccessFilter implements Filter {
-    private static final Logger logger = Logger.getLogger(AppAccessFilter.class.getName());
+    private static final Logger logger = Logger.getLogger(ExternalAPIAccessFilter.class.getName());
     private static String appName = "";
 
     @Override
