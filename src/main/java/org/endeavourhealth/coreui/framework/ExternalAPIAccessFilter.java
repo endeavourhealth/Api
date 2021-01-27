@@ -45,9 +45,6 @@ public class ExternalAPIAccessFilter implements Filter {
             String headerAuthToken = ((HttpServletRequest) request).getHeader("Authorization");
             String userID = "";
 
-
-            logger.info("AuthToken=  " + headerAuthToken);
-
             // validate the incoming authorization token by calling dev keycloak and produce the principal user identifier associated with the token
             Client client = ClientBuilder.newClient();
 
@@ -56,8 +53,6 @@ public class ExternalAPIAccessFilter implements Filter {
             String url = kc.getAuthServerUrl();
             String path = kc.getPathPrefix() + "/" + kc.getRealm() + "/" + kc.getPathSuffix();
 
-
-            logger.info("keycloak url=  " + url + path);
             WebTarget target = client.target(url).path(path);
 
             Boolean isUserAllowedAccess = false;
@@ -70,12 +65,15 @@ public class ExternalAPIAccessFilter implements Filter {
 
                 String entityResponse = kcResponse.readEntity(String.class);
 
-                logger.info("response=  " + entityResponse);
-
                 JSONParser parser = new JSONParser();
                 JSONObject users = (JSONObject) parser.parse(entityResponse);
                 userID = users.get("sub").toString();
-                logger.info("userId: " + userID);
+
+                ((HttpServletRequest) request).getHeader("Authorization");
+
+                MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest(httpServletRequest);
+
+                mutableRequest.putHeader("user_id", userID);
 
                 if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
                /* String entityResponse = kcResponse.readEntity(String.class);
@@ -87,21 +85,17 @@ public class ExternalAPIAccessFilter implements Filter {
                     isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
                     if (isUserAllowedAccess) {
 
-                        logger.info("User is allowed to access the API");
-                        chain.doFilter(request, response);
+                        chain.doFilter(mutableRequest, response);
                     } else {
-                        logger.info("User not allowed");
                         httpServletResponse.sendError(403, "Access is Forbidden");
                     }
 
                 } else { // user is not authorized with this token
-                    logger.info("keycloak response error");
                     httpServletResponse.sendError(403, "Access is Forbidden");
                     return;
                 }
 
             } catch (Exception ex) {
-                logger.info("Main error");
                 httpServletResponse.sendError(403, "Access is Forbidden");
                 return;
             }
@@ -124,3 +118,4 @@ public class ExternalAPIAccessFilter implements Filter {
         return keycloakConfig;
     }
 }
+
