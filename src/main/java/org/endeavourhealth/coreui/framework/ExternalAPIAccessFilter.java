@@ -71,10 +71,6 @@ public class ExternalAPIAccessFilter implements Filter {
 
                 ((HttpServletRequest) request).getHeader("Authorization");
 
-                MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest(httpServletRequest);
-
-                mutableRequest.putHeader("user_id", userID);
-
                 if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
                /* String entityResponse = kcResponse.readEntity(String.class);
                 JSONParser parser = new JSONParser();
@@ -83,12 +79,7 @@ public class ExternalAPIAccessFilter implements Filter {
                 logger.info("userId: "+userID);*/
 
                     isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
-                    if (isUserAllowedAccess) {
 
-                        chain.doFilter(mutableRequest, response);
-                    } else {
-                        httpServletResponse.sendError(403, "Access is Forbidden");
-                    }
 
                 } else { // user is not authorized with this token
                     httpServletResponse.sendError(403, "Access is Forbidden");
@@ -97,6 +88,19 @@ public class ExternalAPIAccessFilter implements Filter {
 
             } catch (Exception ex) {
                 httpServletResponse.sendError(403, "Access is Forbidden");
+                return;
+            }
+
+            MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest(httpServletRequest);
+
+            mutableRequest.putHeader("user_id", userID);
+
+            if (!isUserAllowedAccess) {
+                httpServletResponse.sendError(403, "Access is Forbidden");
+                return;
+            } else {
+
+                chain.doFilter(mutableRequest, response);
                 return;
             }
 
