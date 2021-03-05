@@ -51,7 +51,7 @@ public class AppAccessFilter implements Filter {
                     isUserAllowedAccess = UserCache.getUserProjectApplicationAccess(userId, userProject.getProjectId(), appId);
 
                 } catch (Exception e) {
-                    logger.log(Level.INFO, "Error: " + e.getMessage());
+                    logger.log(Level.INFO, "Error:  " + e.getMessage());
                     httpServletResponse.sendError(403, "Access is Forbidden");
                 }
             }
