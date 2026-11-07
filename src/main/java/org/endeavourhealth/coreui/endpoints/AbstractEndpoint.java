@@ -56,4 +56,5 @@ public abstract class AbstractEndpoint {
         return RoleUtils.isEDSAdmin(sc);       // TODO: should this be ADMIN or SUPERUSER??
     }
 
+
 }

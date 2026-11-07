@@ -10,17 +10,11 @@ import org.endeavourhealth.core.database.dal.datasharingmanager.enums.MapType;
 import org.endeavourhealth.core.database.dal.datasharingmanager.models.JsonProject;
 import org.endeavourhealth.core.database.dal.usermanager.UserProjectDalI;
 import org.endeavourhealth.core.database.dal.usermanager.caching.*;
-import org.endeavourhealth.core.database.dal.usermanager.models.JsonApplicationPolicyAttribute;
-import org.endeavourhealth.core.database.dal.usermanager.models.JsonUserOrganisationProject;
-import org.endeavourhealth.core.database.dal.usermanager.models.JsonUserProfile;
-import org.endeavourhealth.core.database.dal.usermanager.models.JsonUserProject;
+import org.endeavourhealth.core.database.dal.usermanager.models.*;
 import org.endeavourhealth.core.database.rdbms.datasharingmanager.models.OrganisationEntity;
 import org.endeavourhealth.core.database.rdbms.datasharingmanager.models.ProjectEntity;
 import org.endeavourhealth.core.database.rdbms.datasharingmanager.models.RegionEntity;
-import org.endeavourhealth.core.database.rdbms.usermanager.models.ApplicationPolicyEntity;
-import org.endeavourhealth.core.database.rdbms.usermanager.models.UserApplicationPolicyEntity;
-import org.endeavourhealth.core.database.rdbms.usermanager.models.UserProjectEntity;
-import org.endeavourhealth.core.database.rdbms.usermanager.models.UserRegionEntity;
+import org.endeavourhealth.core.database.rdbms.usermanager.models.*;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +42,13 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/getProjects")
     public Response getProjects(@Context SecurityContext sc,
-                             @QueryParam("userId") String userId) throws Exception {
+                                @QueryParam("userId") String userId) throws Exception {
         super.setLogbackMarkers(sc);
 
         userAudit.save(getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
                 "Roles", "userId", userId);
 
         LOG.trace("getRole");
-
         return getProjectsForUser(userId);
 
     }
@@ -65,9 +58,9 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/setDefaultProject")
     public Response setDefaultProject(@Context SecurityContext sc,
-                             @QueryParam("userId") String userId,
-                             @QueryParam("defaultProjectId") String defaultProjectId,
-                             @QueryParam("userProjectId") String userProjectId) throws Exception {
+                                      @QueryParam("userId") String userId,
+                                      @QueryParam("defaultProjectId") String defaultProjectId,
+                                      @QueryParam("userProjectId") String userProjectId) throws Exception {
         super.setLogbackMarkers(sc);
 
         userAudit.save(getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
@@ -91,7 +84,30 @@ public class UserManagerEndpoint extends AbstractEndpoint {
                 "application(s)");
 
         return getUserProfile(userId);
+    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/getCurrentUserProfile")
+    public Response getCurrentUserAccessProfile(@Context SecurityContext sc) throws Exception {
 
+        super.setLogbackMarkers(sc);
+        userAudit.save(SecurityUtils.getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
+                "application(s)");
+
+        return getUserProfile(SecurityUtils.getCurrentUserId(sc).toString());
+
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/getApplicationDefaultProjectInfo")
+    public Response getApplicationProjectInfo(@Context SecurityContext sc,
+                                              @QueryParam("userId") String userId,
+                                              @QueryParam("appName") String appName) throws Exception {
+
+        return getProjectsIncludingApplicationInfoForUser(userId, appName);
     }
 
     @GET
@@ -99,7 +115,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/getPublishersForProject")
     public Response getPublishersForProject(@Context SecurityContext sc,
-                                     @QueryParam("projectId") String projectId) throws Exception {
+                                            @QueryParam("projectId") String projectId) throws Exception {
 
         super.setLogbackMarkers(sc);
         userAudit.save(SecurityUtils.getCurrentUserId(sc), getOrganisationUuidFromToken(sc), AuditAction.Load,
@@ -114,6 +130,26 @@ public class UserManagerEndpoint extends AbstractEndpoint {
 
     }
 
+    private Response getProjectsIncludingApplicationInfoForUser(String userId, String appName) throws Exception {
+        UserApplicationProjectEntity uape = UserCache.getUserProjectApplicationInfo(userId, appName);
+        List<JsonUserProjectWithAppInfo> uProjects = new ArrayList<>();
+
+
+        JsonUserProjectWithAppInfo userProject = new JsonUserProjectWithAppInfo();
+        userProject.setProjectId(uape.getProjectId());
+        userProject.setUserProjectId(uape.getUserProjectId());
+        userProject.setUserId(uape.getUserId());
+        userProject.setOrganisationId(uape.getOrganisationId());
+        userProject.setDeleted(uape.getIsDeleted().toString().equals("1"));
+        userProject.setDefault(uape.getIsDefault().toString().equals("1"));
+        userProject.setAppName(uape.getAppName());
+        userProject.setAppId(uape.getAppId());
+        uProjects.add(userProject);
+
+
+        return Response.ok().entity(userProject).build();
+    }
+
     private Response getProjectsForUser(String userId) throws Exception {
 
         List<Object[]> roles = userProjectRepository.getUserProjects(userId);
@@ -121,7 +157,7 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         List<String> organisations = new ArrayList<>();
         List<String> projects = new ArrayList<>();
 
-        for (Object[] obj : roles){
+        for (Object[] obj : roles) {
             JsonUserProject userProject = new JsonUserProject();
             userProject.setId(obj[0].toString());
             userProject.setUserId(obj[1].toString());
@@ -205,8 +241,8 @@ public class UserManagerEndpoint extends AbstractEndpoint {
         if (userAttributes != null) {
             Iterator var3 = userAttributes.keySet().iterator();
 
-            while(var3.hasNext()) {
-                String attributeKey = (String)var3.next();
+            while (var3.hasNext()) {
+                String attributeKey = (String) var3.next();
                 Object obj;
                 if (attributeKey.equalsIgnoreCase("mobile")) {
                     obj = userAttributes.get(attributeKey);
