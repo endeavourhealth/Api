@@ -16,10 +16,14 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ExternalAPIAccessFilter implements Filter {
+    //NOTE: this is a Java.util.logging logger, rather than SLF4J as used everywhere else in DDS,
+    //so the methods to log errors etc. are different.
     private static final Logger logger = Logger.getLogger(ExternalAPIAccessFilter.class.getName());
+
     private static String appName = "";
 
     @Override
@@ -30,8 +34,9 @@ public class ExternalAPIAccessFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-
-        logger.info("Get Patient Record request received ");
+        //misleading logging since this class is used for all new APIs
+        logger.info("API request received ");
+        //logger.info("Get Patient Record request received ");
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
@@ -57,6 +62,7 @@ public class ExternalAPIAccessFilter implements Filter {
 
             Boolean isUserAllowedAccess = false;
 
+            logger.info("Checking keycloak ");
             try {
                 Response kcResponse = target
                         .request()
@@ -71,6 +77,8 @@ public class ExternalAPIAccessFilter implements Filter {
 
                 ((HttpServletRequest) request).getHeader("Authorization");
 
+
+
                 if (kcResponse.getStatus() == HttpStatus.SC_OK) { // user is authorized in keycloak, so get the user record and ID associated with the token
                /* String entityResponse = kcResponse.readEntity(String.class);
                 JSONParser parser = new JSONParser();
@@ -78,15 +86,27 @@ public class ExternalAPIAccessFilter implements Filter {
                 userID = users.get("sub").toString();
                 logger.info("userId: "+userID);*/
 
+                    logger.info("token ok, checking user details ");
+
+                    logger.info("user = " + userID);
+
+                    logger.info("appName =  " + appName);
+
                     isUserAllowedAccess = UserCache.getExternalUserApplicationAccess(userID, appName);
 
+                    logger.info("isAllowed Access = " + isUserAllowedAccess);
 
                 } else { // user is not authorized with this token
+
+                    logger.info("token invalid = " + isUserAllowedAccess);
                     httpServletResponse.sendError(403, "Access is Forbidden");
                     return;
                 }
 
             } catch (Exception ex) {
+                //change to actually log out the exception, not just the top level message, which is often null
+                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                //logger.info("error " + ex.getMessage());
                 httpServletResponse.sendError(403, "Access is Forbidden");
                 return;
             }

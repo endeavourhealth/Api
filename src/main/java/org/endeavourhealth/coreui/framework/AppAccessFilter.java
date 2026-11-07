@@ -42,7 +42,7 @@ public class AppAccessFilter implements Filter {
             // boolean isUserAllowedAccess = appId.equalsIgnoreCase("User Manager");
             Boolean isUserAllowedAccess = false;
 
-            if (userProjectId == null && (pathURI.contains("getUserProfile") || pathURI.contains("getProjects"))) {
+            if (userProjectId == null && (pathURI.contains("getUserProfile") || pathURI.contains("getProjects") || pathURI.contains("getCurrentUserProfile"))) {
                 isUserAllowedAccess = true;
             } else {
                 try {
